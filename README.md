@@ -1,10 +1,5 @@
-# Sheepie
-Sheepie is the WordPress theme for my frequently-renamed [personal blog](http://www.bhalash.com), named in honour of my son's stuffed toy.
-
-## Description
-Sheepie is the WordPress theme for my personal site, although if you are feeling adventurous, you can extract the CSS to use yourself for a different CMS. As my personal site theme, it is in a permanent state of flux. Features may be missing, the appearance may be broken and this could quite possibly trash your WordPress installation depending on what point in time I commit code to the repository.
-
-As much as every GPL project carries a disclaimer about reliability and liability, you should truly consider "caveat emptor" here. 
+# Sheepie Related Posts
+Sheepie is the WordPress theme for my frequently-renamed [personal blog](http://www.bhalash.com), named in honour of my son's stuffed toy. This file contains a set of functions which will fetch posts related to a given post.
 
 ## License
 All of the code in the project is licensed under the GPL v3 or later, except as otherwise noted.
