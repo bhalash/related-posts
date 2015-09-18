@@ -28,13 +28,22 @@ if (!defined('ABSPATH')) {
  * @return  array             $related    Array of related posts.
  */
 
-function rp_get_related($post = null, $count = 3, $timeout = 12, $range = null) {
-    if (!($post = get_post($post))) {
+function rp_get_related($args) { 
+    $defaults = array(
+        'post' => get_the_id(),
+        'count' => 3,
+        'range' => array(
+            'after' => date('Y-m-j') . '-21 days',
+            'before' => date('Y-m-j')
+        )
+    );
+
+    $args = wp_parse_args($args, $defaults);
+
+    if (!($post = get_post($args['post']))) {
         global $post;
     }
 
-    $trans = 'single_post_related_' . $post->ID;
-    $timeout *= HOUR_IN_SECONDS;
     $query_cat = array();
 
     if (!($categories = get_the_category($post->ID))) {
@@ -45,33 +54,22 @@ function rp_get_related($post = null, $count = 3, $timeout = 12, $range = null) 
         $query_cat[] = $cat->cat_ID;
     }
 
-    $default_range = array(
-        'after' => date('Y-m-j') . ' -21 days',
-        'before' => date('Y-m-j')
-    );
+    $related = get_posts(array(
+        'category__in' => $query_cat,
+        'date_query' => array(
+            'inclusive' => true,
+            'after' => $args['range']['after'],
+            'before' => $args['range']['before']
+        ),
+        'numberposts' => $args['count'],
+        'order' => 'DESC',
+        'orderby' => 'rand',
+        'perm' => 'readable',
+        'post_status' => 'publish',
+        'post__not_in' => array($post->ID)
+    )); 
 
-    $range = wp_parse_args($default_range, $range);
-
-    if (!($related = get_transient($trans))) {
-        $related = get_posts(array(
-            'category__in' => $query_cat,
-            'date_query' => array(
-                'inclusive' => true,
-                'after' => $range['after'],
-                'before' => $range['before']
-            ),
-            'numberposts' => $count,
-            'order' => 'DESC',
-            'orderby' => 'rand',
-            'perm' => 'readable',
-            'post_status' => 'publish',
-            'post__not_in' => array($post->ID)
-        )); 
-
-        set_transient($trans, $related, $timeout);
-    }
-
-    if ($missing = $count - sizeof($related)) {
+    if ($missing = $args['count'] - sizeof($related)) {
         // Filler isn't cached because that could cause problems.
         $related = rp_related_filler($post, $missing, $related);
     }
