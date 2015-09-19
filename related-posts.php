@@ -32,6 +32,11 @@ function rp_get_related($args) {
     $defaults = array(
         'post' => get_the_id(),
         'count' => 3,
+        'cache' => true,
+        'trans' => array(
+            'name' => 'rp_related_trans_',
+            'expiry' => 12 * HOUR_IN_SECONDS
+        ),
         'range' => array(
             'after' => date('Y-m-j') . '-21 days',
             'before' => date('Y-m-j')
@@ -44,30 +49,42 @@ function rp_get_related($args) {
         global $post;
     }
 
-    $query_cat = array();
+    if ($args['cache']) {
+        $args['trans']['name'] .= $post->ID;
+    }
 
     if (!($categories = get_the_category($post->ID))) {
         $categories = get_option('default_category');
     }
 
+    $query_cat = array();
+
     foreach ($categories as $cat) {
         $query_cat[] = $cat->cat_ID;
     }
 
-    $related = get_posts(array(
-        'category__in' => $query_cat,
-        'date_query' => array(
-            'inclusive' => true,
-            'after' => $args['range']['after'],
-            'before' => $args['range']['before']
-        ),
-        'numberposts' => $args['count'],
-        'order' => 'DESC',
-        'orderby' => 'rand',
-        'perm' => 'readable',
-        'post_status' => 'publish',
-        'post__not_in' => array($post->ID)
-    )); 
+    if ($args['cache'] && !($related = get_transient($args['trans']['name']))) {
+        $related = get_posts(array(
+            'category__in' => $query_cat,
+            'date_query' => array(
+                'inclusive' => true,
+                'after' => $args['range']['after'],
+                'before' => $args['range']['before']
+            ),
+            'numberposts' => $args['count'],
+            'order' => 'DESC',
+            'orderby' => 'rand',
+            'perm' => 'readable',
+            'post_status' => 'publish',
+            'post__not_in' => array($post->ID)
+        )); 
+
+        set_transient(
+            $args['trans']['name'],
+            $related,
+            $args['trans']['expiry']
+        );
+    }
 
     if ($missing = $args['count'] - sizeof($related)) {
         // Filler isn't cached because that could cause problems.
