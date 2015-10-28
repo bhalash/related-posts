@@ -7,8 +7,8 @@
  * @package    Sheepie Related Posts
  * @author     Mark Grealish <mark@bhalash.com>
  * @copyright  Copyright (c) 2015 Mark Grealish
- * @license    https://www.gnu.org/copyleft/gpl.html The GNU General Public License v3.0
- * @version    3.0
+ * @license    https://www.gnu.org/copyleft/gpl.html The GNU General Public License v1.0
+ * @version    1.0
  * @link       https://github.com/bhalash/sheepie-related-posts
  */
 
@@ -23,7 +23,6 @@ if (!defined('ABSPATH')) {
  * 
  * @param   int/object        $post       Post object.
  * @param   int               $count      Number of related posts to fetch.
- * @param   int               $timeout    Delay in hours for transient API. 
  * @param   array             $range      Date range to to back in time.
  * @return  array             $related    Array of related posts.
  */
@@ -33,10 +32,6 @@ function rp_get_related($args) {
         'post' => get_the_id(),
         'count' => 3,
         'cache' => true,
-        'trans' => array(
-            'name' => 'rp_related_trans_',
-            'expiry' => 12 * HOUR_IN_SECONDS
-        ),
         'range' => array(
             'after' => date('Y-m-j') . '-21 days',
             'before' => date('Y-m-j')
@@ -49,10 +44,6 @@ function rp_get_related($args) {
         global $post;
     }
 
-    if ($args['cache']) {
-        $args['trans']['name'] .= $post->ID;
-    }
-
     if (!($categories = get_the_category($post->ID))) {
         $categories = get_option('default_category');
     }
@@ -63,28 +54,20 @@ function rp_get_related($args) {
         $query_cat[] = $cat->cat_ID;
     }
 
-    if ($args['cache'] && !($related = get_transient($args['trans']['name']))) {
-        $related = get_posts(array(
-            'category__in' => $query_cat,
-            'date_query' => array(
-                'inclusive' => true,
-                'after' => $args['range']['after'],
-                'before' => $args['range']['before']
-            ),
-            'numberposts' => $args['count'],
-            'order' => 'DESC',
-            'orderby' => 'rand',
-            'perm' => 'readable',
-            'post_status' => 'publish',
-            'post__not_in' => array($post->ID)
-        )); 
-
-        set_transient(
-            $args['trans']['name'],
-            $related,
-            $args['trans']['expiry']
-        );
-    }
+    $related = get_posts(array(
+        'category__in' => $query_cat,
+        'date_query' => array(
+            'inclusive' => true,
+            'after' => $args['range']['after'],
+            'before' => $args['range']['before']
+        ),
+        'numberposts' => $args['count'],
+        'order' => 'DESC',
+        'orderby' => 'rand',
+        'perm' => 'readable',
+        'post_status' => 'publish',
+        'post__not_in' => array($post->ID)
+    )); 
 
     if ($missing = $args['count'] - sizeof($related)) {
         // Filler isn't cached because that could cause problems.
