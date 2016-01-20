@@ -20,14 +20,14 @@ if (!defined('ABSPATH')) {
  * Get Related Posts from the Same Category
  * -----------------------------------------------------------------------------
  * Fetch posts related to given post, by category.
- * 
+ *
  * @param   int/object        $post       Post object.
  * @param   int               $count      Number of related posts to fetch.
  * @param   array             $range      Date range to to back in time.
  * @return  array             $related    Array of related posts.
  */
 
-function rp_get_related($args) { 
+function rp_get_related($args) {
     $defaults = array(
         'post' => get_the_id(),
         'count' => 3,
@@ -67,7 +67,7 @@ function rp_get_related($args) {
         'perm' => 'readable',
         'post_status' => 'publish',
         'post__not_in' => array($post->ID)
-    )); 
+    ));
 
     if ($missing = $args['count'] - sizeof($related)) {
         // Filler isn't cached because that could cause problems.
@@ -87,13 +87,13 @@ function rp_get_related($args) {
  */
 
 function rp_related_filler($post, $count, $related) {
-    $exlude = array(); 
+    $exlude = array();
     $exclude[] = $post->ID;
 
     foreach ($related as $r) {
         $exclude[] = $r->ID;
     }
-    
+
     $filler = get_posts(array(
         'numberposts' => $count,
         'order' => 'DESC',
