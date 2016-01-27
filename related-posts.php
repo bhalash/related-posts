@@ -28,15 +28,15 @@ if (!defined('ABSPATH')) {
  */
 
 function rp_get_related($args) {
-    $defaults = array(
+    $defaults = [
         'post' => get_the_id(),
         'count' => 3,
         'cache' => true,
-        'range' => array(
+        'range' => [
             'after' => date('Y-m-j') . '-21 days',
             'before' => date('Y-m-j')
-        )
-    );
+        ]
+    ];
 
     $args = wp_parse_args($args, $defaults);
 
@@ -48,26 +48,26 @@ function rp_get_related($args) {
         $categories = get_option('default_category');
     }
 
-    $query_cat = array();
+    $query_cat = [];
 
     foreach ($categories as $cat) {
         $query_cat[] = $cat->cat_ID;
     }
 
-    $related = get_posts(array(
+    $related = get_posts([
         'category__in' => $query_cat,
-        'date_query' => array(
+        'date_query' => [
             'inclusive' => true,
             'after' => $args['range']['after'],
             'before' => $args['range']['before']
-        ),
+        ],
         'numberposts' => $args['count'],
         'order' => 'DESC',
         'orderby' => 'rand',
         'perm' => 'readable',
         'post_status' => 'publish',
-        'post__not_in' => array($post->ID)
-    ));
+        'post__not_in' => [$post->ID]
+    ]);
 
     if ($missing = $args['count'] - sizeof($related)) {
         // Filler isn't cached because that could cause problems.
@@ -87,19 +87,19 @@ function rp_get_related($args) {
  */
 
 function rp_related_filler($post, $count, $related) {
-    $exlude = array();
+    $exlude = []
     $exclude[] = $post->ID;
 
     foreach ($related as $r) {
         $exclude[] = $r->ID;
     }
 
-    $filler = get_posts(array(
+    $filler = get_posts([
         'numberposts' => $count,
         'order' => 'DESC',
         'orederby' => 'rand',
         'post__not_in' => $exclude
-    ));
+    ]);
 
     return array_merge($related, $filler);
 }
