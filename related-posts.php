@@ -7,9 +7,9 @@
  * @package    Sheepie Related Posts
  * @author     Mark Grealish <mark@bhalash.com>
  * @copyright  Copyright (c) 2015 Mark Grealish
- * @license    https://www.gnu.org/copyleft/gpl.html The GNU General Public License v1.0
- * @version    1.0
- * @link       https://github.com/bhalash/sheepie-related-posts
+ * @license    https://www.gnu.org/copyleft/gpl.html The GNU GPL v3.0
+ * @version    1.1
+ * @link       https://github.com/bhalash/related-posts
  */
 
 if (!defined('ABSPATH')) {
@@ -21,9 +21,7 @@ if (!defined('ABSPATH')) {
  * -----------------------------------------------------------------------------
  * Fetch posts related to given post, by category.
  *
- * @param   int/object        $post       Post object.
- * @param   int               $count      Number of related posts to fetch.
- * @param   array             $range      Date range to to back in time.
+ * @param   array             $args       Array of arguments.
  * @return  array             $related    Array of related posts.
  */
 
@@ -44,10 +42,7 @@ function rp_get_related($args) {
         global $post;
     }
 
-    if (!($categories = get_the_category($post->ID))) {
-        $categories = get_option('default_category');
-    }
-
+    $categories = get_the_category($post->ID) ?: get_option('default_category');
     $query_cat = [];
 
     foreach ($categories as $cat) {
@@ -86,22 +81,21 @@ function rp_get_related($args) {
  * @return  array             Filler posts.
  */
 
-function rp_related_filler($post, $count, $related) {
-    $exlude = [];
-    $exclude[] = $post->ID;
+function rp_related_filler($post, $count, $related_posts) {
+    $excluded_posts = [$post->ID];
 
-    foreach ($related as $r) {
-        $exclude[] = $r->ID;
+    foreach ($related_posts as $related) {
+        $excluded_posts[] = $related->ID;
     }
 
-    $filler = get_posts([
+    $filler_posts = get_posts([
         'numberposts' => $count,
         'order' => 'DESC',
         'orederby' => 'rand',
-        'post__not_in' => $exclude
+        'post__not_in' => $excluded_posts
     ]);
 
-    return array_merge($related, $filler);
+    return array_merge($related, $filler_posts);
 }
 
 ?>
