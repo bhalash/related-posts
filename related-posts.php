@@ -87,7 +87,7 @@ function rp_get_related($args) {
  */
 
 function rp_related_filler($post, $count, $related) {
-    $exlude = []
+    $exlude = [];
     $exclude[] = $post->ID;
 
     foreach ($related as $r) {
