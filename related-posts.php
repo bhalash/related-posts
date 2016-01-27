@@ -33,7 +33,7 @@ function rp_get_related($args) {
         'count' => 3,
         'cache' => true,
         'range' => [
-            'after' => date('Y-m-j') . '-21 days',
+            'after' => date('Y-m-j') . '-180 days',
             'before' => date('Y-m-j')
         ]
     ];
