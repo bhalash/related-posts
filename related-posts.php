@@ -66,7 +66,7 @@ function rp_get_related($args) {
 
     if ($missing = $args['count'] - sizeof($related)) {
         // Filler isn't cached because that could cause problems.
-        $related = rp_related_filler($post, $missing, $related);
+        $related = rp_filler_posts($post, $missing, $related);
     }
 
     return $related;
@@ -81,7 +81,7 @@ function rp_get_related($args) {
  * @return  array             Filler posts.
  */
 
-function rp_related_filler($post, $count, $related_posts) {
+function rp_filler_posts($post, $count, $related_posts) {
     $excluded_posts = [$post->ID];
 
     foreach ($related_posts as $related) {
