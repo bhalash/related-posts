@@ -26,7 +26,7 @@ if (!defined('ABSPATH')) {
  */
 
 function rp_get_related($args) {
-    $defaults = [
+    $args = wp_parse_args($args, [
         'post' => get_the_id(),
         'count' => 3,
         'cache' => true,
@@ -34,9 +34,7 @@ function rp_get_related($args) {
             'after' => date('Y-m-j') . '-180 days',
             'before' => date('Y-m-j')
         ]
-    ];
-
-    $args = wp_parse_args($args, $defaults);
+    ]);
 
     if (!($post = get_post($args['post']))) {
         global $post;
