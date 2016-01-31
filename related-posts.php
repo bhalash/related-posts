@@ -65,7 +65,6 @@ function rp_get_related($args) {
     ]);
 
     if ($missing = $args['count'] - sizeof($related)) {
-        // Filler isn't cached because that could cause problems.
         $related = rp_filler_posts($post, $missing, $related);
     }
 
